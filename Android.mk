@@ -73,6 +73,7 @@ static_libraries_needed_by_slang := \
 	libclangBasic	\
 	libLLVMSupport
 
+ifneq ($(TARGET_ARCH),mips)
 # Static library libslang for host
 # ========================================================
 include $(CLEAR_VARS)
@@ -249,10 +250,17 @@ include frameworks/compile/slang/RSSpec.mk
 include $(CLANG_HOST_BUILD_MK)
 include $(CLANG_TBLGEN_RULES_MK)
 include $(BUILD_HOST_EXECUTABLE)
-
+else
+# MIPS: Copy the prebuilt llvm-rs-cc compiler from prebuilt/sdk/tools/linux/llvm-rs-cc
+include $(CLEAR_VARS)
+$(HOST_OUT_EXECUTABLES)/llvm-rs-cc$(HOST_EXECUTABLE_SUFFIX): $(HOST_OUT_EXECUTABLES)/acp$(HOST_EXECUTABLE_SUFFIX)
+	$(ACP) -p prebuilt/sdk/tools/linux/llvm-rs-cc $(HOST_OUT_EXECUTABLES)/llvm-rs-cc$(HOST_EXECUTABLE_SUFFIX)
+endif
 endif  # TARGET_BUILD_APPS
 
 #=====================================================================
 # Include Subdirectories
 #=====================================================================
+ifneq ($(TARGET_ARCH),mips)
 include $(call all-makefiles-under,$(LOCAL_PATH))
+endif
