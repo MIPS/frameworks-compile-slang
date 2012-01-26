@@ -253,10 +253,19 @@ include $(CLANG_HOST_BUILD_MK)
 include $(CLANG_TBLGEN_RULES_MK)
 include $(BUILD_HOST_EXECUTABLE)
 else
-# MIPS: Copy the prebuilt llvm-rs-cc compiler from prebuilt/sdk/tools/linux/llvm-rs-cc
+# MIPS: ICS-MR1 version of LLVM backend is too old for Mips.
+# Copy a newer llvm-rs-cc frontend from prebuilt/.
 include $(CLEAR_VARS)
-$(HOST_OUT_EXECUTABLES)/llvm-rs-cc$(HOST_EXECUTABLE_SUFFIX): $(HOST_OUT_EXECUTABLES)/acp$(HOST_EXECUTABLE_SUFFIX)
-	$(ACP) -p prebuilt/sdk/tools/linux/llvm-rs-cc $(HOST_OUT_EXECUTABLES)/llvm-rs-cc$(HOST_EXECUTABLE_SUFFIX)
+ifeq ($(HOST_OS),windows)
+llvm-rs-cc: $(ACP)
+	mkdir -p $(HOST_OUT_EXECUTABLES)
+	$(ACP) -p prebuilt/windows/llvm-rs-cc/llvm-rs-cc.exe $(HOST_OUT_EXECUTABLES)/llvm-rs-cc.exe
+else
+llvm-rs-cc: $(ACP)
+	$(ACP) -p prebuilt/sdk/tools/linux/llvm-rs-cc $(HOST_OUT_EXECUTABLES)/llvm-rs-cc
+$(HOST_OUT_EXECUTABLES)/llvm-rs-cc: $(ACP)
+	$(ACP) -p prebuilt/sdk/tools/linux/llvm-rs-cc $(HOST_OUT_EXECUTABLES)/llvm-rs-cc
+endif
 endif
 endif  # TARGET_BUILD_APPS
 
