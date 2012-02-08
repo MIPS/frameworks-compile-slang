@@ -260,13 +260,13 @@ ifeq ($(HOST_OS),windows)
 llvm-rs-cc: $(ACP)
 	mkdir -p $(HOST_OUT_EXECUTABLES)
 	$(ACP) -p prebuilt/windows/llvm-rs-cc/llvm-rs-cc.exe $(HOST_OUT_EXECUTABLES)/llvm-rs-cc.exe
-else
+else  ## not windows: linux or darwin
 llvm-rs-cc: $(ACP)
-	$(ACP) -p prebuilt/sdk/tools/linux/llvm-rs-cc $(HOST_OUT_EXECUTABLES)/llvm-rs-cc
+	$(ACP) -p prebuilt/sdk/tools/$(HOST_OS)/llvm-rs-cc $(HOST_OUT_EXECUTABLES)/llvm-rs-cc
 $(HOST_OUT_EXECUTABLES)/llvm-rs-cc: $(ACP)
-	$(ACP) -p prebuilt/sdk/tools/linux/llvm-rs-cc $(HOST_OUT_EXECUTABLES)/llvm-rs-cc
-endif
-endif
+	$(ACP) -p prebuilt/sdk/tools/$(HOST_OS)/llvm-rs-cc $(HOST_OUT_EXECUTABLES)/llvm-rs-cc
+endif  # HOST_OS windows
+endif  # MIPS
 endif  # TARGET_BUILD_APPS
 
 #=====================================================================
