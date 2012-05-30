@@ -73,6 +73,7 @@ static_libraries_needed_by_slang := \
 	libclangBasic \
 	libLLVMSupport
 
+ifneq ($(TARGET_ARCH),mips)
 # Static library libslang for host
 # ========================================================
 include $(CLEAR_VARS)
@@ -251,10 +252,26 @@ include frameworks/compile/slang/RSSpec.mk
 include $(CLANG_HOST_BUILD_MK)
 include $(CLANG_TBLGEN_RULES_MK)
 include $(BUILD_HOST_EXECUTABLE)
-
+else
+# MIPS: ICS-MR1 version of LLVM backend is too old for Mips.
+# Copy a newer llvm-rs-cc frontend from prebuilt/.
+include $(CLEAR_VARS)
+ifeq ($(HOST_OS),windows)
+llvm-rs-cc: $(ACP)
+	mkdir -p $(HOST_OUT_EXECUTABLES)
+	$(ACP) -p prebuilt/windows/llvm-rs-cc/llvm-rs-cc.exe $(HOST_OUT_EXECUTABLES)/llvm-rs-cc.exe
+else  ## not windows: linux or darwin
+llvm-rs-cc: $(ACP)
+	$(ACP) -p prebuilt/sdk/tools/$(HOST_OS)/llvm-rs-cc $(HOST_OUT_EXECUTABLES)/llvm-rs-cc
+$(HOST_OUT_EXECUTABLES)/llvm-rs-cc: $(ACP)
+	$(ACP) -p prebuilt/sdk/tools/$(HOST_OS)/llvm-rs-cc $(HOST_OUT_EXECUTABLES)/llvm-rs-cc
+endif  # HOST_OS windows
+endif  # MIPS
 endif  # TARGET_BUILD_APPS
 
 #=====================================================================
 # Include Subdirectories
 #=====================================================================
+ifneq ($(TARGET_ARCH),mips)
 include $(call all-makefiles-under,$(LOCAL_PATH))
+endif
