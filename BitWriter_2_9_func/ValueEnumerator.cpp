@@ -19,8 +19,12 @@
 #include "llvm/Module.h"
 #include "llvm/ValueSymbolTable.h"
 #include "llvm/Instructions.h"
+#include "llvm/Support/Debug.h"
+#include "llvm/Support/raw_ostream.h"
 #include <algorithm>
 using namespace llvm;
+
+namespace llvm_2_9_func {
 
 static bool isIntegerValue(const std::pair<const Value*, unsigned> &V) {
   return V.first->getType()->isIntegerTy();
@@ -107,7 +111,6 @@ ValueEnumerator::ValueEnumerator(const Module *M) {
   OptimizeConstants(FirstConstant, Values.size());
 }
 
-
 unsigned ValueEnumerator::getInstructionID(const Instruction *Inst) const {
   InstructionMapType::const_iterator I = InstructionMap.find(Inst);
   assert(I != InstructionMap.end() && "Instruction is not mapped!");
@@ -128,6 +131,43 @@ unsigned ValueEnumerator::getValueID(const Value *V) const {
   ValueMapType::const_iterator I = ValueMap.find(V);
   assert(I != ValueMap.end() && "Value not in slotcalculator!");
   return I->second-1;
+}
+
+void ValueEnumerator::dump() const {
+  print(dbgs(), ValueMap, "Default");
+  dbgs() << '\n';
+  print(dbgs(), MDValueMap, "MetaData");
+  dbgs() << '\n';
+}
+
+void ValueEnumerator::print(raw_ostream &OS, const ValueMapType &Map,
+                            const char *Name) const {
+
+  OS << "Map Name: " << Name << "\n";
+  OS << "Size: " << Map.size() << "\n";
+  for (ValueMapType::const_iterator I = Map.begin(),
+         E = Map.end(); I != E; ++I) {
+
+    const Value *V = I->first;
+    if (V->hasName())
+      OS << "Value: " << V->getName();
+    else
+      OS << "Value: [null]\n";
+    V->dump();
+
+    OS << " Uses(" << std::distance(V->use_begin(),V->use_end()) << "):";
+    for (Value::const_use_iterator UI = V->use_begin(), UE = V->use_end();
+         UI != UE; ++UI) {
+      if (UI != V->use_begin())
+        OS << ",";
+      if((*UI)->hasName())
+        OS << " " << (*UI)->getName();
+      else
+        OS << " [null]";
+
+    }
+    OS <<  "\n\n";
+  }
 }
 
 // Optimize constant ordering.
@@ -283,10 +323,6 @@ void ValueEnumerator::EnumerateValue(const Value *V) {
   if (const Constant *C = dyn_cast<Constant>(V)) {
     if (isa<GlobalValue>(C)) {
       // Initializers for globals are handled explicitly elsewhere.
-    //} else if (isa<ConstantArray>(C) && cast<ConstantArray>(C)->isString()) {
-      // Do not enumerate the initializers for an array of simple characters.
-      // The initializers just pollute the value table, and we emit the strings
-      // specially.
     } else if (C->getNumOperands()) {
       // If a constant has operands, enumerate them.  This makes sure that if a
       // constant has uses (for example an array of const ints), that they are
@@ -303,6 +339,16 @@ void ValueEnumerator::EnumerateValue(const Value *V) {
 
       // Finally, add the value.  Doing this could make the ValueID reference be
       // dangling, don't reuse it.
+      Values.push_back(std::make_pair(V, 1U));
+      ValueMap[V] = Values.size();
+      return;
+    } else if (const ConstantDataSequential *CDS =
+               dyn_cast<ConstantDataSequential>(C)) {
+      // For our legacy handling of the new ConstantDataSequential type, we
+      // need to enumerate the individual elements, as well as mark the
+      // outer constant as used.
+      for (unsigned i = 0, e = CDS->getNumElements(); i != e; ++i)
+        EnumerateValue(CDS->getElementAsConstant(i));
       Values.push_back(std::make_pair(V, 1U));
       ValueMap[V] = Values.size();
       return;
@@ -492,3 +538,4 @@ unsigned ValueEnumerator::getGlobalBasicBlockID(const BasicBlock *BB) const {
   return getGlobalBasicBlockID(BB);
 }
 
+}  // end llvm_2_9_func namespace
