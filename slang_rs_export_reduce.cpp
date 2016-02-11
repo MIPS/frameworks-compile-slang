@@ -754,6 +754,7 @@ void RSExportReduceNew::analyzeOutConverter(StateOfAnalyzeTranslationUnit &S) {
   }
 }
 
+// Process "bool haltername(const compType *accum)"
 void RSExportReduceNew::analyzeHalter(StateOfAnalyzeTranslationUnit &S) {
   if (!S.FnHalter) // halter is always optional
     return;
