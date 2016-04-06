@@ -146,8 +146,9 @@ TBLGEN_TABLES :=    \
 	DiagnosticDriverKinds.inc	\
 	DiagnosticFrontendKinds.inc	\
 	DiagnosticSemaKinds.inc	\
-	StmtNodes.inc	\
-	RSCCOptions.inc
+	Options.inc \
+	RSCCOptions.inc \
+	StmtNodes.inc
 
 LOCAL_SRC_FILES :=	\
 	llvm-rs-cc.cpp	\
