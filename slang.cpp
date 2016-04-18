@@ -657,6 +657,7 @@ bool Slang::compile(
   }
 
   if (mTargetAPI >= SLANG_M_TARGET_API) {
+    LangOpts.NativeHalfArgsAndReturns = 1;
     LangOpts.NativeHalfType = 1;
     LangOpts.HalfArgsAndReturns = 1;
   }

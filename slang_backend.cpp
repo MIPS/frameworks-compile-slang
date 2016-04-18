@@ -429,7 +429,7 @@ bool Backend::HandleTopLevelDecl(clang::DeclGroupRef D) {
       }
     }
 
-    if (getTargetAPI() == SLANG_DEVELOPMENT_TARGET_API) {
+    if (getTargetAPI() >= SLANG_N_TARGET_API) {
       if (FD && FD->hasBody() &&
           !Slang::IsLocInRSHeaderFile(FD->getLocation(), mSourceMgr)) {
         bool isKernel = RSExportForEach::isRSForEachFunc(getTargetAPI(), FD);
