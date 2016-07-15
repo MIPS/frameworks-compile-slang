@@ -191,7 +191,6 @@ static void llvm_rs_cc_VersionPrinter() {
   OS << "llvm-rs-cc: Renderscript compiler\n"
      << "  (http://developer.android.com/guide/topics/renderscript)\n"
      << "  based on LLVM (http://llvm.org):\n";
-  OS << "  Built " << __DATE__ << " (" << __TIME__ ").\n";
   OS << "  Target APIs: " << SLANG_MINIMUM_TARGET_API << " - "
      << SLANG_MAXIMUM_TARGET_API;
   OS << "\n  Build type: " << wrap_str(TARGET_BUILD_VARIANT);
