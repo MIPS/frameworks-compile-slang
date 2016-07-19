@@ -1364,6 +1364,7 @@ clang::CompoundStmt* RSObjectRefCount::CreateRetStmtWithTempVar(
       RSObjectRefCount::CreateEmptyInitListExpr(C, Loc);
   ZeroInitializer->setType(T->getCanonicalTypeInternal());
   RSRetValDecl->setInit(ZeroInitializer);
+  RSRetValDecl->markUsed(C);
   clang::Decl* Decls[] = { RSRetValDecl };
   const clang::DeclGroupRef DGR = clang::DeclGroupRef::Create(
       C, Decls, sizeof(Decls) / sizeof(*Decls));
@@ -1472,6 +1473,7 @@ void RSObjectRefCount::VisitCallExpr(clang::CallExpr* CE) {
       clang::SC_None                         // Storage class
   );
   TempVarDecl->setInit(CE);
+  TempVarDecl->markUsed(mCtx);
   clang::Decl* Decls[] = { TempVarDecl };
   const clang::DeclGroupRef DGR = clang::DeclGroupRef::Create(
       mCtx, Decls, sizeof(Decls) / sizeof(*Decls));
