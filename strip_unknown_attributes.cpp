@@ -38,6 +38,7 @@ bool StripUnknownAttributes::runOnFunction(llvm::Function &F) {
       changed = true;
     }
   }
+  F.removeFnAttr(llvm::Attribute::ArgMemOnly);
   return changed;
 }
 
