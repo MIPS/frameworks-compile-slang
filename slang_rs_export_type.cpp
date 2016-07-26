@@ -937,11 +937,11 @@ RSExportType *RSExportType::CreateFromDecl(RSContext *Context,
 }
 
 size_t RSExportType::getStoreSize() const {
-  return getRSContext()->getDataLayout()->getTypeStoreSize(getLLVMType());
+  return getRSContext()->getDataLayout().getTypeStoreSize(getLLVMType());
 }
 
 size_t RSExportType::getAllocSize() const {
-    return getRSContext()->getDataLayout()->getTypeAllocSize(getLLVMType());
+    return getRSContext()->getDataLayout().getTypeAllocSize(getLLVMType());
 }
 
 RSExportType::RSExportType(RSContext *Context,
