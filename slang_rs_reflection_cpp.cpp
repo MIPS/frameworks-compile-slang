@@ -587,7 +587,7 @@ void RSReflectionCpp::genPointerTypeExportVariable(const RSExportVar *EV) {
               "Variable should be type of pointer here");
 
   std::string TypeName = GetTypeName(ET);
-  std::string VarName = EV->getName();
+  const std::string &VarName = EV->getName();
 
   RSReflectionTypeData rtd;
   EV->getType()->convertToRTD(&rtd);
@@ -1012,7 +1012,7 @@ RSReflectionCpp::genInitPrimitiveExportVariable(const std::string &VarName,
 void RSReflectionCpp::genInitValue(const clang::APValue &Val, bool asBool) {
   switch (Val.getKind()) {
   case clang::APValue::Int: {
-    llvm::APInt api = Val.getInt();
+    const llvm::APInt &api = Val.getInt();
     if (asBool) {
       mOut << ((api.getSExtValue() == 0) ? "false" : "true");
     } else {
@@ -1026,7 +1026,7 @@ void RSReflectionCpp::genInitValue(const clang::APValue &Val, bool asBool) {
   }
 
   case clang::APValue::Float: {
-    llvm::APFloat apf = Val.getFloat();
+    const llvm::APFloat &apf = Val.getFloat();
     llvm::SmallString<30> s;
     apf.toString(s);
     mOut << s.c_str();
