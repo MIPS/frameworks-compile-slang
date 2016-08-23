@@ -803,8 +803,8 @@ void RSReflectionJava::genExportFunction(const RSExportFunc *EF) {
   endFunction();
 }
 
-void RSReflectionJava::genPairwiseDimCheck(std::string name0,
-                                           std::string name1) {
+void RSReflectionJava::genPairwiseDimCheck(const std::string &name0,
+                                           const std::string &name1) {
 
   mOut.indent() << "// Verify dimensions\n";
   mOut.indent() << "t0 = " << name0 << ".getType();\n";
@@ -1655,7 +1655,7 @@ void RSReflectionJava::genPrimitiveTypeExportVariable(const RSExportVar *EV) {
   const RSExportPrimitiveType *EPT =
       static_cast<const RSExportPrimitiveType *>(EV->getType());
   std::string TypeName = GetTypeName(EPT);
-  std::string VarName = EV->getName();
+  const std::string &VarName = EV->getName();
 
   genPrivateExportVariable(TypeName, EV->getName());
 
@@ -1713,7 +1713,7 @@ void RSReflectionJava::genPrimitiveTypeExportVariable(const RSExportVar *EV) {
 void RSReflectionJava::genInitValue(const clang::APValue &Val, bool asBool) {
   switch (Val.getKind()) {
   case clang::APValue::Int: {
-    llvm::APInt api = Val.getInt();
+    const llvm::APInt &api = Val.getInt();
     if (asBool) {
       mOut << ((api.getSExtValue() == 0) ? "false" : "true");
     } else {
@@ -1727,7 +1727,7 @@ void RSReflectionJava::genInitValue(const clang::APValue &Val, bool asBool) {
   }
 
   case clang::APValue::Float: {
-    llvm::APFloat apf = Val.getFloat();
+    const llvm::APFloat &apf = Val.getFloat();
     llvm::SmallString<30> s;
     apf.toString(s);
     mOut << s.c_str();
@@ -1762,7 +1762,7 @@ void RSReflectionJava::genPointerTypeExportVariable(const RSExportVar *EV) {
 
   PointeeType = static_cast<const RSExportPointerType *>(ET)->getPointeeType();
   std::string TypeName = GetTypeName(ET);
-  std::string VarName = EV->getName();
+  const std::string &VarName = EV->getName();
 
   genPrivateExportVariable(TypeName, VarName);
 
@@ -1806,7 +1806,7 @@ void RSReflectionJava::genMatrixTypeExportVariable(const RSExportVar *EV) {
 
   const RSExportType *ET = EV->getType();
   std::string TypeName = GetTypeName(ET);
-  std::string VarName = EV->getName();
+  const std::string &VarName = EV->getName();
 
   genPrivateExportVariable(TypeName, VarName);
 
@@ -1870,7 +1870,7 @@ void RSReflectionJava::genSetExportVariable(const std::string &TypeName,
                                             unsigned Dimension) {
   if (!EV->isConst()) {
     const char *FieldPackerName = "fp";
-    std::string VarName = EV->getName();
+    const std::string &VarName = EV->getName();
     const RSExportType *ET = EV->getType();
     startFunction(AM_PublicSynchronized, false, "void", "set_" + VarName, 1,
                   TypeName.c_str(), "v");
