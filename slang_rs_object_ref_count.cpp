@@ -1453,7 +1453,17 @@ void RSObjectRefCount::VisitCallExpr(clang::CallExpr* CE) {
     RetTy = FuncType->getReturnType();
   }
 
-  if (CountRSObjectTypes(RetTy.getTypePtr())==0) {
+  // The RenderScript runtime API maintains the invariant that the sysRef of a new RS object would
+  // be 1, with the exception of rsGetAllocation() (deprecated in API 22), which leaves the sysRef
+  // 0 for a new allocation. It is the responsibility of the callee of the API to decrement the
+  // sysRef when a reference of the RS object goes out of scope. The compiler generates code to do
+  // just that, by creating a temporary variable named ".rs.tmpN" with the result of
+  // an RS-object-returning API directly assigned to it, and calling rsClearObject() on .rs.tmpN
+  // right before it exits the current scope. Such code generation is skipped for rsGetAllocation()
+  // to avoid decrementing its sysRef below zero.
+
+  if (CountRSObjectTypes(RetTy.getTypePtr())==0 ||
+      (FD && FD->getName() == "rsGetAllocation")) {
     return;
   }
 
