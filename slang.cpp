@@ -523,7 +523,9 @@ bool Slang::checkODR(const char *CurInputFile) {
       //  Name(F) = the field name.
 
       bool PassODR = false;
-      // Cond. #1 and Cond. #2
+      // Cond. #1 and part of Cond. #2;
+      // RSExportRecordType::equal doesn't look at field type names,
+      // so we'll check them later.
       if (Reflected->equals(ERT)) {
         // Cond #3.
         RSExportRecordType::const_field_iterator AI = Reflected->fields_begin(),
@@ -531,6 +533,11 @@ bool Slang::checkODR(const char *CurInputFile) {
 
         for (unsigned i = 0, e = Reflected->getFields().size(); i != e; i++) {
           if ((*AI)->getName() != (*BI)->getName())
+            break;
+          // Rest of Cond. #2
+          const RSExportType *AITy = (*AI)->getType(), *BITy = (*BI)->getType();
+          if (AITy->getClass() == RSExportType::ExportClassRecord &&
+              AITy->getName() != BITy->getName())
             break;
           AI++;
           BI++;
