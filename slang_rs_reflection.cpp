@@ -2531,18 +2531,10 @@ void RSReflectionJavaElementBuilder::genAddElement(const RSExportType *ET,
       if (ElementType->getClass() != RSExportType::ExportClassRecord) {
         genAddElement(ECAT->getElementType(), VarName, ECAT->getNumElement());
       } else {
-        std::string NewElementBuilderName(mElementBuilderName);
-        NewElementBuilderName.append(1, '_');
-
-        RSReflectionJavaElementBuilder builder(
-            NewElementBuilderName.c_str(),
-            static_cast<const RSExportRecordType *>(ElementType),
-            mRenderScriptVar, mOut, mRSContext, mReflection);
-        builder.generate();
-
+        slangAssert((ArraySize == 0) && "Cannot reflect multidimensional array types");
         ArraySize = ECAT->getNumElement();
         genAddStatementStart();
-        *mOut << NewElementBuilderName << ".create()";
+        *mOut << ElementType->getElementName() << ".createElement(" << mRenderScriptVar << ")";
         genAddStatementEnd(VarName, ArraySize);
       }
       break;
@@ -2579,17 +2571,8 @@ void RSReflectionJavaElementBuilder::genAddElement(const RSExportType *ET,
         if (F->getType()->getClass() != RSExportType::ExportClassRecord) {
           genAddElement(F->getType(), FieldName, 0);
         } else {
-          std::string NewElementBuilderName(mElementBuilderName);
-          NewElementBuilderName.append(1, '_');
-
-          RSReflectionJavaElementBuilder builder(
-              NewElementBuilderName.c_str(),
-              static_cast<const RSExportRecordType *>(F->getType()),
-              mRenderScriptVar, mOut, mRSContext, mReflection);
-          builder.generate();
-
           genAddStatementStart();
-          *mOut << NewElementBuilderName << ".create()";
+          *mOut << F->getType()->getElementName() << ".createElement(" << mRenderScriptVar << ")";
           genAddStatementEnd(FieldName, ArraySize);
         }
 
