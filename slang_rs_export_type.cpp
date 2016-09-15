@@ -345,6 +345,7 @@ static const clang::Type *TypeExportableHelper(
       return T;
     }
     case clang::Type::FunctionProto:
+    case clang::Type::FunctionNoProto:
       ReportTypeError(Context, VD, TopLevelRecord,
                       "function types cannot be exported: '%0'");
       return nullptr;
@@ -374,11 +375,16 @@ static const clang::Type *TypeExportableHelper(
         return nullptr;
       }
 
-      // We don't support pointer with array-type pointee or unsupported pointee
-      // type
-      if (PointeeType->isArrayType() ||
-          (TypeExportableHelper(PointeeType, SPS, Context, VD,
-                                TopLevelRecord, EK) == nullptr))
+      // We don't support pointer with array-type pointee
+      if (PointeeType->isArrayType()) {
+        ReportTypeError(Context, VD, TopLevelRecord,
+            "pointers to arrays cannot be exported: '%0'");
+        return nullptr;
+      }
+
+      // Check for unsupported pointee type
+      if (TypeExportableHelper(PointeeType, SPS, Context, VD,
+                                TopLevelRecord, EK) == nullptr)
         return nullptr;
       else
         return T;
