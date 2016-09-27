@@ -501,51 +501,9 @@ bool Slang::checkODR(const char *CurInputFile) {
 
     if (RD != ReflectedDefinitions.end()) {
       const RSExportRecordType *Reflected = RD->getValue().first;
-      // There's a record (struct) with the same name reflected before. Enforce
-      // ODR checking - the Reflected must hold *exactly* the same "definition"
-      // as the one defined previously. We say two record types A and B have the
-      // same definition iff:
-      //
-      //  struct A {              struct B {
-      //    Type(a1) a1,            Type(b1) b1,
-      //    Type(a2) a2,            Type(b1) b2,
-      //    ...                     ...
-      //    Type(aN) aN             Type(b3) b3,
-      //  };                      }
-      //  Cond. #1. They have same number of fields, i.e., N = M;
-      //  Cond. #2. for (i := 1 to N)
-      //              Type(ai) = Type(bi) must hold;
-      //  Cond. #3. for (i := 1 to N)
-      //              Name(ai) = Name(bi) must hold;
-      //
-      // where,
-      //  Type(F) = the type of field F and
-      //  Name(F) = the field name.
 
-      bool PassODR = false;
-      // Cond. #1 and part of Cond. #2;
-      // RSExportRecordType::equal doesn't look at field type names,
-      // so we'll check them later.
-      if (Reflected->equals(ERT)) {
-        // Cond #3.
-        RSExportRecordType::const_field_iterator AI = Reflected->fields_begin(),
-                                                 BI = ERT->fields_begin();
-
-        for (unsigned i = 0, e = Reflected->getFields().size(); i != e; i++) {
-          if ((*AI)->getName() != (*BI)->getName())
-            break;
-          // Rest of Cond. #2
-          const RSExportType *AITy = (*AI)->getType(), *BITy = (*BI)->getType();
-          if (AITy->getClass() == RSExportType::ExportClassRecord &&
-              AITy->getName() != BITy->getName())
-            break;
-          AI++;
-          BI++;
-        }
-        PassODR = (AI == (Reflected->fields_end()));
-      }
-
-      if (!PassODR) {
+      // See RSExportRecordType::matchODR for the logic
+      if (!Reflected->matchODR(ERT, true)) {
         unsigned DiagID = mDiagEngine->getCustomDiagID(
             clang::DiagnosticsEngine::Error,
             "type '%0' in different translation unit (%1 v.s. %2) "
