@@ -1980,7 +1980,7 @@ void RSReflectionJava::genPackVarOfType(const RSExportType *ET,
       Level++;
     }
     std::string IndexVarName("ct");
-    IndexVarName.append(llvm::utostr_32(Level));
+    IndexVarName.append(llvm::utostr(Level));
 
     mOut.indent() << "for (int " << IndexVarName << " = 0; " << IndexVarName
                   << " < " << ECAT->getNumElement() << "; " << IndexVarName << "++)";
