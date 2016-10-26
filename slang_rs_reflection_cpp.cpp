@@ -789,7 +789,7 @@ void RSReflectionCpp::genPackVarOfType(const RSExportType *ET,
     Level++;
   }
   std::string IndexVarName("ct");
-  IndexVarName.append(llvm::utostr_32(Level));
+  IndexVarName.append(llvm::utostr(Level));
 
   C.indent() << "for (int " << IndexVarName << " = 0; " <<
                       IndexVarName << " < " << ECAT->getSize() << "; " <<
