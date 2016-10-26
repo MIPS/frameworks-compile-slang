@@ -95,11 +95,7 @@ void Backend::CreateModulePasses() {
     llvm::PassManagerBuilder PMBuilder;
     PMBuilder.OptLevel = mCodeGenOpts.OptimizationLevel;
     PMBuilder.SizeLevel = mCodeGenOpts.OptimizeSize;
-    if (mCodeGenOpts.UnitAtATime) {
-      PMBuilder.DisableUnitAtATime = 0;
-    } else {
-      PMBuilder.DisableUnitAtATime = 1;
-    }
+    PMBuilder.DisableUnitAtATime = 0; // TODO Pirama confirm if this is right
 
     if (mCodeGenOpts.UnrollLoops) {
       PMBuilder.DisableUnrollLoops = 0;
@@ -226,7 +222,7 @@ Backend::Backend(RSContext *Context, clang::DiagnosticsEngine *DiagEngine,
       mRefCount(mContext->getASTContext()),
       mASTChecker(Context, Context->getTargetAPI(), IsFilterscript),
       mForEachHandler(Context),
-      mLLVMContext(llvm::getGlobalContext()), mDiagEngine(*DiagEngine),
+      mLLVMContext(slang::getGlobalLLVMContext()), mDiagEngine(*DiagEngine),
       mCodeGenOpts(CodeGenOpts), mPragmas(Pragmas) {
   mGen = CreateLLVMCodeGen(mDiagEngine, "", HeaderSearchOpts, PreprocessorOpts,
       mCodeGenOpts, mLLVMContext);
@@ -432,7 +428,7 @@ bool Backend::HandleTopLevelDecl(clang::DeclGroupRef D) {
     if (getTargetAPI() >= SLANG_FEATURE_SINGLE_SOURCE_API) {
       if (FD && FD->hasBody() &&
           !Slang::IsLocInRSHeaderFile(FD->getLocation(), mSourceMgr)) {
-        if (FD->hasAttr<clang::KernelAttr>()) {
+        if (FD->hasAttr<clang::RenderScriptKernelAttr>()) {
           // Log functions with attribute "kernel" by their names, and assign
           // them slot numbers. Any other function cannot be used in a
           // rsForEach() or rsForEachWithOptions() call, including old-style
@@ -537,7 +533,7 @@ void Backend::dumpExportVarInfo(llvm::Module *M) {
             static_cast<const RSExportPrimitiveType*>(ET);
         ExportVarInfo.push_back(
             llvm::MDString::get(
-              mLLVMContext, llvm::utostr_32(PT->getType())));
+              mLLVMContext, llvm::utostr(PT->getType())));
         if (PT->isRSObjectType()) {
           countsAsRSObject = true;
         }
@@ -553,7 +549,7 @@ void Backend::dumpExportVarInfo(llvm::Module *M) {
       case RSExportType::ExportClassMatrix: {
         ExportVarInfo.push_back(
             llvm::MDString::get(
-              mLLVMContext, llvm::utostr_32(
+              mLLVMContext, llvm::utostr(
                   /* TODO Strange value.  This pushes just a number, quite
                    * different than the other cases.  What is this used for?
                    * These are the metadata values that some partner drivers
@@ -586,7 +582,7 @@ void Backend::dumpExportVarInfo(llvm::Module *M) {
 
     if (countsAsRSObject) {
       mRSObjectSlotsMetadata->addOperand(llvm::MDNode::get(mLLVMContext,
-          llvm::MDString::get(mLLVMContext, llvm::utostr_32(slotCount))));
+          llvm::MDString::get(mLLVMContext, llvm::utostr(slotCount))));
     }
 
     slotCount++;
@@ -763,7 +759,7 @@ void Backend::dumpExportForEachInfo(llvm::Module *M) {
 
     ExportForEachInfo.push_back(
         llvm::MDString::get(mLLVMContext,
-                            llvm::utostr_32(EFE->getSignatureMetadata())));
+                            llvm::utostr(EFE->getSignatureMetadata())));
 
     mExportForEachSignatureMetadata->addOperand(
         llvm::MDNode::get(mLLVMContext, ExportForEachInfo));
@@ -804,14 +800,14 @@ void Backend::dumpExportReduceInfo(llvm::Module *M) {
 
     addString(Idx++, (*I)->getNameReduce());
 
-    addOperand(Idx++, llvm::MDString::get(mLLVMContext, llvm::utostr_32((*I)->getAccumulatorTypeSize())));
+    addOperand(Idx++, llvm::MDString::get(mLLVMContext, llvm::utostr((*I)->getAccumulatorTypeSize())));
 
     llvm::SmallVector<llvm::Metadata *, 2> Accumulator;
     Accumulator.push_back(
       llvm::MDString::get(mLLVMContext, (*I)->getNameAccumulator()));
     Accumulator.push_back(llvm::MDString::get(
       mLLVMContext,
-      llvm::utostr_32((*I)->getAccumulatorSignatureMetadata())));
+      llvm::utostr((*I)->getAccumulatorSignatureMetadata())));
     addOperand(Idx++, llvm::MDTuple::get(mLLVMContext, Accumulator));
 
     addString(Idx++, (*I)->getNameInitializer(), false);

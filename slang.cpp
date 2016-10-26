@@ -86,8 +86,8 @@
 
 namespace {
 
-static const char *kRSTriple32 = "armv7-none-linux-gnueabi";
-static const char *kRSTriple64 = "aarch64-none-linux-gnueabi";
+static const char *kRSTriple32 = "renderscript32-none-linux-gnueabi";
+static const char *kRSTriple64 = "renderscript64-none-linux-gnueabi";
 
 }  // namespace
 
@@ -124,6 +124,10 @@ namespace slang {
 // bcc.cpp)
 const llvm::StringRef Slang::PragmaMetadataName = "#pragma";
 
+static llvm::LLVMContext globalContext;
+
+llvm::LLVMContext &getGlobalLLVMContext() { return globalContext; }
+
 static inline llvm::tool_output_file *
 OpenOutputFile(const char *OutputFile,
                llvm::sys::fs::OpenFlags Flags,
@@ -149,15 +153,10 @@ OpenOutputFile(const char *OutputFile,
 }
 
 void Slang::createTarget(uint32_t BitWidth) {
-  std::vector<std::string> features;
-
   if (BitWidth == 64) {
     mTargetOpts->Triple = kRSTriple64;
   } else {
     mTargetOpts->Triple = kRSTriple32;
-    // Treat long as a 64-bit type for our 32-bit RS code.
-    features.push_back("+long64");
-    mTargetOpts->FeaturesAsWritten = features;
   }
 
   mTarget.reset(clang::TargetInfo::CreateTargetInfo(*mDiagEngine,
@@ -253,7 +252,7 @@ Slang::Slang(uint32_t BitWidth, clang::DiagnosticsEngine *DiagEngine,
   LangOpts.RTTI = 0;  // Turn off the RTTI information support
   LangOpts.LineComment = 1;
   LangOpts.C99 = 1;
-  LangOpts.Renderscript = 1;
+  LangOpts.RenderScript = 1;
   LangOpts.LaxVectorConversions = 0;  // Do not bitcast vectors!
   LangOpts.CharIsSigned = 1;  // Signed char is our default.
 
@@ -439,9 +438,9 @@ int Slang::compile(const RSCCOptions &Opts) {
 
 void Slang::setDebugMetadataEmission(bool EmitDebug) {
   if (EmitDebug)
-    CodeGenOpts.setDebugInfo(clang::CodeGenOptions::FullDebugInfo);
+    CodeGenOpts.setDebugInfo(clang::codegenoptions::FullDebugInfo);
   else
-    CodeGenOpts.setDebugInfo(clang::CodeGenOptions::NoDebugInfo);
+    CodeGenOpts.setDebugInfo(clang::codegenoptions::NoDebugInfo);
 }
 
 void Slang::setOptimizationLevel(llvm::CodeGenOpt::Level OptimizationLevel) {
