@@ -147,7 +147,9 @@ bool RSReflectionCpp::writeHeaderFile() {
   }
 
   mOut.indent() << "#include \"RenderScript.h\"\n\n";
-  mOut.indent() << "using namespace android::RSC;\n\n";
+  // Add NOLINT to suppress clang-tidy warnings of "using namespace".
+  // Keep "using namespace" to compile existing code.
+  mOut.indent() << "using namespace android::RSC;  // NOLINT\n\n";
 
   mOut.comment("This class encapsulates access to the exported elements of the script.  "
                "Typically, you would instantiate this class once, call the set_* methods "
