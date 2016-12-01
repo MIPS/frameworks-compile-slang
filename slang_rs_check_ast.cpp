@@ -291,6 +291,11 @@ bool RSCheckAST::Validate() {
           DE = TUDecl->decls_end();
        DI != DE;
        DI++) {
+
+    // Following tests are not applicable to implicitly defined types
+    if (DI->isImplicit())
+      continue;
+
     if (!Slang::IsLocInRSHeaderFile(DI->getLocStart(), mSM)) {
       if (clang::VarDecl *VD = llvm::dyn_cast<clang::VarDecl>(*DI)) {
         ValidateVarDecl(VD);
