@@ -359,6 +359,7 @@ Backend::~Backend() {
 void Backend::AnnotateFunction(clang::FunctionDecl *FD) {
   if (FD &&
       FD->hasBody() &&
+      !FD->isImplicit() &&
       !Slang::IsLocInRSHeaderFile(FD->getLocation(), mSourceMgr)) {
     mRefCount.Init();
     mRefCount.SetDeclContext(FD);
@@ -426,7 +427,7 @@ bool Backend::HandleTopLevelDecl(clang::DeclGroupRef D) {
     }
 
     if (getTargetAPI() >= SLANG_FEATURE_SINGLE_SOURCE_API) {
-      if (FD && FD->hasBody() &&
+      if (FD && FD->hasBody() && !FD->isImplicit() &&
           !Slang::IsLocInRSHeaderFile(FD->getLocation(), mSourceMgr)) {
         if (FD->hasAttr<clang::RenderScriptKernelAttr>()) {
           // Log functions with attribute "kernel" by their names, and assign
