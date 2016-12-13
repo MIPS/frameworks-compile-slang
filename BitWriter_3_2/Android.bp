@@ -1,0 +1,15 @@
+// For the host and device
+// =====================================================
+cc_library_static {
+    name: "libLLVMBitWriter_3_2",
+    host_supported: true,
+    defaults: ["slang-defaults"],
+
+    include_dirs: ["frameworks/compile/slang"],
+
+    srcs: [
+        "BitcodeWriter.cpp",
+        "BitcodeWriterPass.cpp",
+        "ValueEnumerator.cpp",
+    ],
+}
