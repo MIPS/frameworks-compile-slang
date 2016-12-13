@@ -1,0 +1,14 @@
+// For the host
+// =====================================================
+cc_library_host_static {
+    name: "libLLVMBitWriter_2_9_func",
+    defaults: ["slang-defaults"],
+
+    include_dirs: ["frameworks/compile/slang"],
+
+    srcs: [
+        "BitcodeWriter.cpp",
+        "BitcodeWriterPass.cpp",
+        "ValueEnumerator.cpp",
+    ],
+}
