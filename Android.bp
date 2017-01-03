@@ -70,6 +70,7 @@ static_libraries_needed_by_slang = [
 cc_library_host_static {
     name: "libslang",
     defaults: ["slang-defaults"],
+    compile_multilib: "first",
 
     target: {
         linux: {
@@ -97,7 +98,7 @@ cc_library_host_static {
         "slang_diagnostic_buffer.cpp",
     ],
 
-    include_dirs: ["frameworks/compile/libbcc/include"],
+    shared_libs: ["libbcinfo"],
 
     product_variables: {
         unbundled_build: {
@@ -163,11 +164,10 @@ cc_binary_host {
         "strip_unknown_attributes.cpp",
     ],
 
-    include_dirs: ["frameworks/compile/libbcc/include"],
-
     static_libs: ["libslang"] + static_libraries_needed_by_slang,
 
     shared_libs: [
+        "libbcinfo",
         "libclang",
         "libLLVM",
     ],
