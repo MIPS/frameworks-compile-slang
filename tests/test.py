@@ -70,7 +70,7 @@ def ExecTest(dirname):
 
   out_dir = os.environ['ANDROID_HOST_OUT']
   cmd_string = ('%s/bin/llvm-rs-cc -o tmp/ -p tmp/ -MD '
-                '-I ../../../../../frameworks/rs/scriptc/ '
+                '-I ../../../../../frameworks/rs/script_api/include/ '
                 '-I ../../../../../external/clang/lib/Headers/') % out_dir
   base_args = cmd_string.split()
   rs_files = glob.glob('*.rs')
