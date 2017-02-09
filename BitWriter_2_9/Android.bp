@@ -5,6 +5,10 @@ cc_library_host_static {
     defaults: ["slang-defaults"],
     include_dirs: ["frameworks/compile/slang"],
 
+    // We don't control the source files under this dir.
+    // So, disable tidy checks.
+    tidy: false,
+
     srcs: [
         "BitcodeWriter.cpp",
         "BitcodeWriterPass.cpp",
