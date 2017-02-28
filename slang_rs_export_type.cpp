@@ -1534,9 +1534,16 @@ RSExportRecordType *RSExportRecordType::Create(RSContext *Context,
           new Field(ET, FD->getName(), ERT,
                     static_cast<size_t>(RL->getFieldOffset(Index) >> 3)));
     } else {
+      // clang static analysis complains about a potential memory leak
+      // for the memory pointed by ERT at the end of this basic
+      // block. This is a false warning because the compiler does not
+      // see that the pointer to this memory is saved away in the
+      // constructor for RSExportRecordType by calling
+      // RSContext::newExportable(this). So, we disable this
+      // particular instance of the warning.
       Context->ReportError(RD->getLocation(),
                            "field type cannot be exported: '%0.%1'")
-          << RD->getName() << FD->getName();
+          << RD->getName() << FD->getName(); // NOLINT
       return nullptr;
     }
   }
