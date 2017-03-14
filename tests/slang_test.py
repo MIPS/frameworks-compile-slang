@@ -139,7 +139,19 @@ def GetRSFiles():
 
 def CreateCmd():
   """Creates the test command to run for the current test."""
-  out_dir = os.environ['ANDROID_HOST_OUT']
+  try:
+    # ANDROID_HOST_OUT is set after `lunch` on local builds
+    out_dir = os.environ['ANDROID_HOST_OUT']
+  except KeyError:
+    # On build server, we need to get the HOST_OUT Makefile variable
+    # because ANDROID_HOST_OUT is not exported on build server
+    out_dir = subprocess.check_output(['bash', '-c',
+                                       'cd ../../../../.. ; '
+                                       'source build/envsetup.sh '
+                                       '1> /dev/null 2> /dev/null ; '
+                                       'realpath `get_build_var HOST_OUT`'])
+    out_dir = out_dir.strip()
+
   cmd_string = ('%s/bin/llvm-rs-cc -o tmp/ -p tmp/ -MD '
                 '-I ../../../../../frameworks/rs/script_api/include/ '
                 '-I ../../../../../external/clang/lib/Headers/') % out_dir
