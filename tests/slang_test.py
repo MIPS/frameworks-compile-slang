@@ -137,24 +137,35 @@ def GetRSFiles():
   return rs_files
 
 
+def GetOutDir():
+  """Returns the directory with llvm-rs-cc."""
+  # If cache has not yet been calculated, do that
+  if GetOutDir.cache is None:
+    try:
+      # ANDROID_HOST_OUT is set after `lunch` on local builds
+      GetOutDir.cache = os.environ['ANDROID_HOST_OUT']
+    except KeyError:
+      # On build server, we need to get the HOST_OUT Makefile variable
+      # because ANDROID_HOST_OUT is not exported on build server
+      GetOutDir.cache = subprocess.check_output(['bash', '-c',
+                                         'cd ../../../../.. ; '
+                                         'source build/envsetup.sh '
+                                         '1> /dev/null 2> /dev/null ; '
+                                         'realpath `get_build_var HOST_OUT`'])
+      GetOutDir.cache = GetOutDir.cache.strip()
+  return GetOutDir.cache
+
+
+# Declare/define cache variable for GetOutDir to cache results
+# This way we only need to call subprocesses once to get the directory
+GetOutDir.cache = None
+
+
 def CreateCmd():
   """Creates the test command to run for the current test."""
-  try:
-    # ANDROID_HOST_OUT is set after `lunch` on local builds
-    out_dir = os.environ['ANDROID_HOST_OUT']
-  except KeyError:
-    # On build server, we need to get the HOST_OUT Makefile variable
-    # because ANDROID_HOST_OUT is not exported on build server
-    out_dir = subprocess.check_output(['bash', '-c',
-                                       'cd ../../../../.. ; '
-                                       'source build/envsetup.sh '
-                                       '1> /dev/null 2> /dev/null ; '
-                                       'realpath `get_build_var HOST_OUT`'])
-    out_dir = out_dir.strip()
-
   cmd_string = ('%s/bin/llvm-rs-cc -o tmp/ -p tmp/ -MD '
                 '-I ../../../../../frameworks/rs/script_api/include/ '
-                '-I ../../../../../external/clang/lib/Headers/') % out_dir
+                '-I ../../../../../external/clang/lib/Headers/') % GetOutDir()
   base_args = cmd_string.split()
   rs_files = GetRSFiles()
 
