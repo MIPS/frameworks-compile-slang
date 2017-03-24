@@ -58,9 +58,43 @@ enum SlangFeatureAPI {
   SLANG_FEATURE_SINGLE_SOURCE_API = SLANG_N_TARGET_API,
 };
 
-// SlangVersion refers to the released compiler version (for which certain
-// behaviors could change - i.e. critical bugs fixed that may require
-// additional workarounds in the backend compiler).
+// SlangVersion refers to the released compiler version, for which
+// certain behaviors could change.
+//
+// The SlangVersion is recorded in the generated bitcode.  A bitcode
+// consumer (for example: runtime, driver, bcc) is expected to use
+// this version number as follows:
+//
+//   If version number is at least $VERSION, then I can assume that
+//   $PROPERTY holds.
+//
+// However, a bitcode consumer is not obligated to act on this
+// information (for example, the consumer may be too old to know about
+// that version number).  So slang must not change its behavior for
+// $VERSION in such a way that a backend needs to know about $VERSION
+// in order to behave properly.
+//
+// For example:
+//
+//   If version number is at least N_STRUCT_EXPLICIT_PADDING, then I
+//   can assume that no field of any struct is followed by implicit
+//   padding.
+//
+//   bcc can take advantage of this (by turning off analyses and
+//   transformations that are needed because of implicit padding), but
+//   slang must still generate code that works properly with a bcc
+//   that is too old to know about the N_STRUCT_EXPLICIT_PADDING
+//   guarantee.
+//
+// Note that we CANNOT say
+//
+//   If version number is at least $VERSION_LO but lower than
+//   $VERSION_HI, then I can assume that $PROPERTY holds.
+//
+// because a bitcode consumer might know about $VERSION_LO (where it
+// could start taking advantage of $PROPERTY) without knowing about
+// $VERSION_HI (where it would have to stop taking advantage of
+// $PROPERTY).
 namespace SlangVersion {
 enum {
   LEGACY = 0,
