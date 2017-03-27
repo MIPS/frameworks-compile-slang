@@ -33,6 +33,7 @@
 
 #include "slang_rs_exportable.h"
 
+#define RS_PADDING_FIELD_NAME ".rs.padding"
 
 inline const clang::Type* GetCanonicalType(const clang::Type* T) {
   if (T == nullptr) {
