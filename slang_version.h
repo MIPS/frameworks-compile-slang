@@ -74,7 +74,8 @@ enum {
   M = 2300,
   M_RS_OBJECT = 2310,
   N = 2400,
-  CURRENT = N
+  N_STRUCT_EXPLICIT_PADDING = 2410,
+  CURRENT = N_STRUCT_EXPLICIT_PADDING
 };
 }  // namespace SlangVersion
 
