@@ -65,18 +65,6 @@ static_libraries_needed_by_slang = [
     "libLLVMBitWriter_3_2",
 ]
 
-// Exported header files
-cc_library_headers {
-    name: "slang_headers",
-    export_include_dirs: ["."],
-    host_supported: true,
-    target: {
-        windows: {
-	    enabled: true,
-	},
-    },
-}
-
 // Static library libslang for host
 // ========================================================
 cc_library_host_static {
