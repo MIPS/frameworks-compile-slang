@@ -1526,9 +1526,6 @@ RSExportRecordType *RSExportRecordType::Create(RSContext *Context,
       return nullptr;
     }
 
-    if (FD->isImplicit() && (FD->getName() == RS_PADDING_FIELD_NAME))
-      continue;
-
     // Type
     RSExportType *ET = RSExportElement::CreateFromDecl(Context, FD);
 
