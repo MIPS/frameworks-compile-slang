@@ -409,12 +409,14 @@ void Backend::PadStruct(clang::RecordDecl* RD) {
                                 nullptr /* IdentifierInfo */);
   RDForLayout->startDefinition();
   RDForLayout->setTypeForDecl(RD->getTypeForDecl());
-  RDForLayout->setAttrs(RD->getAttrs());
+  if (RD->hasAttrs())
+    RDForLayout->setAttrs(RD->getAttrs());
   RDForLayout->completeDefinition();
 
   // move all fields from RD to RDForLayout
   for (const auto &info : FieldsInfo) {
     RD->removeDecl(info.second);
+    info.second->setLexicalDeclContext(RDForLayout);
     RDForLayout->addDecl(info.second);
   }
 
@@ -507,6 +509,7 @@ void Backend::PadStruct(clang::RecordDecl* RD) {
     }
     if (info.second != nullptr) {
       RDForLayout->removeDecl(info.second);
+      info.second->setLexicalDeclContext(RD);
       RD->addDecl(info.second);
     }
   }
