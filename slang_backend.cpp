@@ -78,6 +78,40 @@
 
 #include "strip_unknown_attributes.h"
 
+namespace {
+class VersionInfoPass : public llvm::ModulePass {
+  const clang::CodeGenOptions &mCodeGenOpts;
+
+  const char *getSlangLLVMVersion() const {
+    if (mCodeGenOpts.getDebugInfo() != clang::codegenoptions::NoDebugInfo)
+      return LLVM_VERSION_STRING;
+    return nullptr;
+  }
+
+public:
+  static char ID;
+  VersionInfoPass(const clang::CodeGenOptions &codegenOpts)
+      : ModulePass(ID), mCodeGenOpts(codegenOpts) {}
+  virtual bool runOnModule(llvm::Module &M) override {
+    const char *versionString = getSlangLLVMVersion();
+    if (!versionString)
+      return false;
+    auto &ctx = M.getContext();
+    auto md = M.getOrInsertNamedMetadata("slang.llvm.version");
+    auto ver = llvm::MDString::get(ctx, versionString);
+    md->addOperand(
+        llvm::MDNode::get(ctx, llvm::ArrayRef<llvm::Metadata *>(ver)));
+    return true;
+  }
+};
+
+char VersionInfoPass::ID = 0;
+
+llvm::ModulePass *createVersionInfoPass(const clang::CodeGenOptions &cgo) {
+  return new VersionInfoPass(cgo);
+}
+}
+
 namespace slang {
 
 void Backend::CreateFunctionPasses() {
@@ -108,6 +142,11 @@ void Backend::CreateModulePasses() {
     PMBuilder.populateModulePassManager(*mPerModulePasses);
     // Add a pass to strip off unknown/unsupported attributes.
     mPerModulePasses->add(createStripUnknownAttributesPass());
+    if (!mContext->isCompatLib()) {
+      // The version info pass is used to ensure that debugging
+      // is matched between slang and bcc.
+      mPerModulePasses->add(createVersionInfoPass(mCodeGenOpts));
+    }
   }
 }
 
