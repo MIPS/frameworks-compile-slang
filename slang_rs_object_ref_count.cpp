@@ -1102,6 +1102,24 @@ void RSObjectRefCount::Scope::AppendRSObjectInit(
 
     clang::Stmt *RSSetObjectOps =
         CreateStructRSSetObject(C, RefRSVar, InitExpr, StartLoc, Loc);
+    // Fix for b/37363420; consider:
+    //
+    // struct foo { rs_matrix m; };
+    // void bar() {
+    //   struct foo M = {...};
+    // }
+    //
+    // slang modifies that declaration with initialization to a
+    // declaration plus an assignment of the initialization values.
+    //
+    // void bar() {
+    //   struct foo M = {};
+    //   M = {...}; // by CreateStructRSSetObject() above
+    // }
+    //
+    // the slang-generated statement (M = {...}) is a use of M, and we
+    // need to mark M (clang::VarDecl *VD) as used.
+    VD->markUsed(C);
 
     std::list<clang::Stmt*> StmtList;
     StmtList.push_back(RSSetObjectOps);
