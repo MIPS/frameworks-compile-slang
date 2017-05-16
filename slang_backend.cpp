@@ -76,7 +76,7 @@
 
 #include "rs_cc_options.h"
 
-#include "strip_unknown_attributes.h"
+#include "StripUnkAttr/strip_unknown_attributes_pass.h"
 
 namespace {
 class VersionInfoPass : public llvm::ModulePass {

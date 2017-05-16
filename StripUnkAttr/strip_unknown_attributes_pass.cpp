@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+#include "strip_unknown_attributes_pass.h"
 #include "strip_unknown_attributes.h"
 
 namespace slang {
@@ -23,23 +24,7 @@ StripUnknownAttributes::StripUnknownAttributes() : ModulePass(ID) {
 
 
 bool StripUnknownAttributes::runOnFunction(llvm::Function &F) {
-  bool changed = false;
-  for (llvm::Function::arg_iterator I = F.arg_begin(), E = F.arg_end();
-       I != E; ++I) {
-    llvm::Argument &A = *I;
-    // Remove any readnone/readonly attributes from function parameters.
-    if (A.onlyReadsMemory()) {
-      llvm::AttrBuilder B;
-      B.addAttribute(llvm::Attribute::ReadNone);
-      B.addAttribute(llvm::Attribute::ReadOnly);
-      llvm::AttributeSet ToStrip = llvm::AttributeSet::get(F.getContext(),
-          A.getArgNo() + 1, B);
-      A.removeAttr(ToStrip);
-      changed = true;
-    }
-  }
-  F.removeFnAttr(llvm::Attribute::ArgMemOnly);
-  return changed;
+  return stripUnknownAttributes(F);
 }
 
 
