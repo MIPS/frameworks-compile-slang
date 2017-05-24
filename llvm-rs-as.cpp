@@ -32,6 +32,8 @@
 #include "slang_bitcode_gen.h"
 #include "slang_version.h"
 
+#include "StripUnkAttr/strip_unknown_attributes.h"
+
 #include <memory>
 using namespace llvm;
 
@@ -60,6 +62,10 @@ static cl::opt<bool>
 DisableVerify("disable-verify", cl::Hidden,
               cl::desc("Do not run verifier on input LLVM (dangerous!)"));
 
+static void stripUnknownAttributes(llvm::Module *M) {
+  for (llvm::Function &F : *M)
+    slang::stripUnknownAttributes(F);
+}
 
 static void WriteOutputFile(const Module *M, uint32_t ModuleTargetAPI) {
   // Infer the output filename if needed.
@@ -139,6 +145,8 @@ int main(int argc, char **argv) {
       return 1;
     }
   }
+
+  stripUnknownAttributes(M.get());
 
   if (DumpAsm) errs() << "Here's the assembly:\n" << *M.get();
 

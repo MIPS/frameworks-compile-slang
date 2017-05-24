@@ -19,11 +19,17 @@
 
 namespace slang {
 
-// Remove any readnone/readonly attributes from function parameters.
+// Remove any readnone/readonly attributes from function parameters,
+// and remove any argmemonly attributes from functions.
+//
 // Jellybean's LLVM version didn't support readnone/readonly as anything
 // other than function attributes, so it will fail verification otherwise.
 // Since we never ran the verifier in Jellybean, it ends up with potential
 // crashes deeper in CodeGen.
+//
+// Similarly, older LLVM versions don't support argmemonly as a function
+// attribute, and so it can trigger an llvm_unreachable assertion when
+// we attempt to write out bitcode.
 class StripUnknownAttributes : public llvm::ModulePass {
 public:
   static char ID;
