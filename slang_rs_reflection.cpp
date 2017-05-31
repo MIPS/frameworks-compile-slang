@@ -177,82 +177,25 @@ static const char *GetPackerAPIName(const RSExportPrimitiveType *EPT) {
 
 namespace {
 
-enum {
-  TypeNameWithConstantArrayBrackets = 0x01,
-  TypeNameWithRecordElementName     = 0x02,
-  TypeNameC                         = 0x04, // else Java
-  TypeNameDefault                   = TypeNameWithConstantArrayBrackets|TypeNameWithRecordElementName
-};
-
-std::string GetTypeName(const RSExportType *ET, unsigned Style = TypeNameDefault) {
-  switch (ET->getClass()) {
-  case RSExportType::ExportClassPrimitive: {
-    const auto ReflectionType =
-        RSExportPrimitiveType::getRSReflectionType(static_cast<const RSExportPrimitiveType *>(ET));
-    return (Style & TypeNameC ? ReflectionType->s_name : ReflectionType->java_name);
-  }
-  case RSExportType::ExportClassPointer: {
-    slangAssert(!(Style & TypeNameC) &&
-                "No need to support C type names for pointer types yet");
-    const RSExportType *PointeeType =
-        static_cast<const RSExportPointerType *>(ET)->getPointeeType();
-
-    if (PointeeType->getClass() != RSExportType::ExportClassRecord)
-      return "Allocation";
-    else
-      return PointeeType->getElementName();
-  }
-  case RSExportType::ExportClassVector: {
-    const RSExportVectorType *EVT = static_cast<const RSExportVectorType *>(ET);
-    const auto ReflectionType = EVT->getRSReflectionType(EVT);
-    std::stringstream VecName;
-    VecName << (Style & TypeNameC ? ReflectionType->s_name : ReflectionType->rs_java_vector_prefix)
-            << EVT->getNumElement();
-    return VecName.str();
-  }
-  case RSExportType::ExportClassMatrix: {
-    slangAssert(!(Style & TypeNameC) &&
-                "No need to support C type names for matrix types yet");
-    return GetMatrixTypeName(static_cast<const RSExportMatrixType *>(ET));
-  }
-  case RSExportType::ExportClassConstantArray: {
-    const RSExportConstantArrayType *CAT =
-        static_cast<const RSExportConstantArrayType *>(ET);
-    std::string ElementTypeName = GetTypeName(CAT->getElementType(), Style);
-    if (Style & TypeNameWithConstantArrayBrackets) {
-      slangAssert(!(Style & TypeNameC) &&
-                  "No need to support C type names for array types with brackets yet");
-      ElementTypeName.append("[]");
-    }
-    return ElementTypeName;
-  }
-  case RSExportType::ExportClassRecord: {
-    slangAssert(!(Style & TypeNameC) &&
-                "No need to support C type names for record types yet");
-    if (Style & TypeNameWithRecordElementName)
-      return ET->getElementName() + "." RS_TYPE_ITEM_CLASS_NAME;
-    else
-      return ET->getName();
-  }
-  default: { slangAssert(false && "Unknown class of type"); }
-  }
-
-  return "";
-}
-
 std::string GetReduceResultTypeName(const RSExportType *ET) {
   switch (ET->getClass()) {
     case RSExportType::ExportClassConstantArray: {
       const RSExportConstantArrayType *const CAT = static_cast<const RSExportConstantArrayType *>(ET);
       return "resultArray" + std::to_string(CAT->getNumElement()) + "_" +
-          GetTypeName(CAT->getElementType(),
-                      (TypeNameDefault & ~TypeNameWithRecordElementName) | TypeNameC);
+          RSReflectionJava::GetTypeName(
+              CAT->getElementType(),
+              (RSReflectionJava::TypeNameDefault & ~RSReflectionJava::TypeNameWithRecordElementName) |
+              RSReflectionJava::TypeNameC);
     }
     case RSExportType::ExportClassRecord:
-      return "resultStruct_" + GetTypeName(ET,
-                                           (TypeNameDefault & ~TypeNameWithRecordElementName) | TypeNameC);
+      return "resultStruct_" +
+          RSReflectionJava::GetTypeName(
+              ET,
+              (RSReflectionJava::TypeNameDefault & ~RSReflectionJava::TypeNameWithRecordElementName) |
+              RSReflectionJava::TypeNameC);
     default:
-      return "result_" + GetTypeName(ET, TypeNameDefault | TypeNameC);
+      return "result_" +
+          RSReflectionJava::GetTypeName(ET, RSReflectionJava::TypeNameDefault | RSReflectionJava::TypeNameC);
   }
 }
 
@@ -374,6 +317,62 @@ static std::string ZeroExtendValue(const std::string &Value,
     Mask = "(" + DestIntegerType + ") " + Mask;
   }
   return "((" + DestIntegerType + ") ((" + Value + ") & " + Mask + "))";
+}
+
+std::string RSReflectionJava::GetTypeName(const RSExportType *ET, unsigned Style) {
+  switch (ET->getClass()) {
+  case RSExportType::ExportClassPrimitive: {
+    const auto ReflectionType =
+        RSExportPrimitiveType::getRSReflectionType(static_cast<const RSExportPrimitiveType *>(ET));
+    return (Style & TypeNameC ? ReflectionType->s_name : ReflectionType->java_name);
+  }
+  case RSExportType::ExportClassPointer: {
+    slangAssert(!(Style & TypeNameC) &&
+                "No need to support C type names for pointer types yet");
+    const RSExportType *PointeeType =
+        static_cast<const RSExportPointerType *>(ET)->getPointeeType();
+
+    if (PointeeType->getClass() != RSExportType::ExportClassRecord)
+      return "Allocation";
+    else
+      return PointeeType->getElementName();
+  }
+  case RSExportType::ExportClassVector: {
+    const RSExportVectorType *EVT = static_cast<const RSExportVectorType *>(ET);
+    const auto ReflectionType = EVT->getRSReflectionType(EVT);
+    std::stringstream VecName;
+    VecName << (Style & TypeNameC ? ReflectionType->s_name : ReflectionType->rs_java_vector_prefix)
+            << EVT->getNumElement();
+    return VecName.str();
+  }
+  case RSExportType::ExportClassMatrix: {
+    slangAssert(!(Style & TypeNameC) &&
+                "No need to support C type names for matrix types yet");
+    return GetMatrixTypeName(static_cast<const RSExportMatrixType *>(ET));
+  }
+  case RSExportType::ExportClassConstantArray: {
+    const RSExportConstantArrayType *CAT =
+        static_cast<const RSExportConstantArrayType *>(ET);
+    std::string ElementTypeName = GetTypeName(CAT->getElementType(), Style);
+    if (Style & TypeNameWithConstantArrayBrackets) {
+      slangAssert(!(Style & TypeNameC) &&
+                  "No need to support C type names for array types with brackets yet");
+      ElementTypeName.append("[]");
+    }
+    return ElementTypeName;
+  }
+  case RSExportType::ExportClassRecord: {
+    slangAssert(!(Style & TypeNameC) &&
+                "No need to support C type names for record types yet");
+    if (Style & TypeNameWithRecordElementName)
+      return ET->getElementName() + "." RS_TYPE_ITEM_CLASS_NAME;
+    else
+      return ET->getName();
+  }
+  default: { slangAssert(false && "Unknown class of type"); }
+  }
+
+  return "";
 }
 
 /********************** Methods to generate script class **********************/
