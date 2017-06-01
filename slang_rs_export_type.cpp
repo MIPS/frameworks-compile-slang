@@ -291,13 +291,12 @@ static const clang::Type *TypeExportableHelper(
       }
 
       clang::RecordDecl *RD = T->getAsStructureType()->getDecl();
-      if (RD != nullptr) {
-        RD = RD->getDefinition();
-        if (RD == nullptr) {
-          ReportTypeError(Context, nullptr, T->getAsStructureType()->getDecl(),
-                          "struct is not defined in this module");
-          return nullptr;
-        }
+      slangAssert(RD);
+      RD = RD->getDefinition();
+      if (RD == nullptr) {
+        ReportTypeError(Context, nullptr, T->getAsStructureType()->getDecl(),
+                        "struct is not defined in this module");
+        return nullptr;
       }
 
       if (!TopLevelRecord) {
@@ -537,12 +536,11 @@ static bool ValidateTypeHelper(
         return false;
       }
 
-      if (RD != nullptr) {
-        RD = RD->getDefinition();
-        if (RD == nullptr) {
-          // FIXME
-          return true;
-        }
+      slangAssert(RD);
+      RD = RD->getDefinition();
+      if (RD == nullptr) {
+        // FIXME
+        return true;
       }
 
       // Fast check
@@ -1059,8 +1057,10 @@ bool RSExportPrimitiveType::IsStructureTypeWithRSObject(const clang::Type *T) {
     // declaration for an RS object type (or an array of one).
     const clang::FieldDecl *FD = *FI;
     const clang::Type *FT = RSExportType::GetTypeOfDecl(FD);
-    while (FT && FT->isArrayType()) {
+    slangAssert(FT);
+    while (FT->isArrayType()) {
       FT = FT->getArrayElementTypeNoTypeQual();
+      slangAssert(FT);
     }
 
     DataType DT = GetRSSpecificType(FT);
@@ -1078,9 +1078,6 @@ bool RSExportPrimitiveType::IsStructureTypeWithRSObject(const clang::Type *T) {
         default:
           // Ignore all other primitive types
           break;
-      }
-      while (FT && FT->isArrayType()) {
-        FT = FT->getArrayElementTypeNoTypeQual();
       }
       if (FT->isStructureType()) {
         // Recursively handle structs of structs (even though these can't
