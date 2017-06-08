@@ -1570,14 +1570,14 @@ void RSObjectRefCount::VisitCallExpr(clang::CallExpr* CE) {
   clang::SourceLocation Loc = CE->getSourceRange().getBegin();
   std::stringstream ss;
   ss << ".rs.tmp" << getNextID();
-  llvm::StringRef VarName(ss.str());
+  clang::IdentifierInfo *II = &mCtx.Idents.get(ss.str());
 
   clang::VarDecl* TempVarDecl = clang::VarDecl::Create(
       mCtx,                                  // AST context
       GetDeclContext(),                      // Decl context
       Loc,                                   // Start location
       Loc,                                   // Id location
-      &mCtx.Idents.get(VarName),             // Id
+      II,                                    // Id
       RetTy,                                 // Type
       mCtx.getTrivialTypeSourceInfo(RetTy),  // Type info
       clang::SC_None                         // Storage class
