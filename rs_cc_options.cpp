@@ -290,9 +290,10 @@ bool ParseArguments(const llvm::ArrayRef<const char *> &ArgsIn,
 
   if (Opts.mTargetAPI == 0) {
     Opts.mTargetAPI = UINT_MAX;
-  } else if (Opts.mTargetAPI == SLANG_N_MR1_TARGET_API) {
+  } else if (Opts.mTargetAPI == SLANG_N_MR1_TARGET_API ||
+             Opts.mTargetAPI == SLANG_O_TARGET_API) {
     // Bug: http://b/35767071
-    // No new APIs for N_MR1, convert to N.
+    // No new APIs for N_MR1 or O, convert to N.
     Opts.mTargetAPI = SLANG_N_TARGET_API;
   }
 
