@@ -20,6 +20,7 @@
 #include "clang/AST/Expr.h"
 #include "clang/AST/NestedNameSpecifier.h"
 #include "clang/AST/OperationKinds.h"
+#include "clang/AST/RecursiveASTVisitor.h"
 #include "clang/AST/Stmt.h"
 #include "clang/AST/StmtVisitor.h"
 
@@ -1393,7 +1394,18 @@ clang::DeclRefExpr *RSObjectRefCount::CreateGuard(clang::ASTContext &C,
   );
 
   clang::Stmt *UpdatedStmt = nullptr;
-  if (!RSExportPrimitiveType::IsRSObjectType(Ty.getTypePtr())) {
+  if (CountRSObjectTypes(Ty.getTypePtr()) == 0) {
+    // The expression E is not an RS object itself. Instead of calling
+    // rsSetObject(), create an assignment statement to set the value of the
+    // temporary "guard" variable to the expression.
+    // This can happen if called from RSObjectRefCount::VisitReturnStmt(),
+    // when the return expression is not an RS object but references one.
+    UpdatedStmt =
+      new(C) clang::BinaryOperator(DRE, E, clang::BO_Assign, Ty,
+                                   clang::VK_RValue, clang::OK_Ordinary, Loc,
+                                   false);
+
+  } else if (!RSExportPrimitiveType::IsRSObjectType(Ty.getTypePtr())) {
     // By definition, this is a struct assignment if we get here
     UpdatedStmt =
         CreateStructRSSetObject(C, DRE, E, Loc, Loc);
@@ -1645,6 +1657,28 @@ void RSObjectRefCount::VisitBinAssign(clang::BinaryOperator *AS) {
   }
 }
 
+namespace {
+
+class FindRSObjRefVisitor : public clang::RecursiveASTVisitor<FindRSObjRefVisitor> {
+public:
+  explicit FindRSObjRefVisitor() : mRefRSObj(false) {}
+  bool VisitExpr(clang::Expr* Expression) {
+    if (CountRSObjectTypes(Expression->getType().getTypePtr()) > 0) {
+      mRefRSObj = true;
+      // Found a reference to an RS object. Stop the AST traversal.
+      return false;
+    }
+    return true;
+  }
+
+  bool foundRSObjRef() const { return mRefRSObj; }
+
+private:
+  bool mRefRSObj;
+};
+
+}  // anonymous namespace
+
 void RSObjectRefCount::VisitReturnStmt(clang::ReturnStmt *RS) {
   getCurrentScope()->setCurrentStmt(RS);
 
@@ -1664,11 +1698,14 @@ void RSObjectRefCount::VisitReturnStmt(clang::ReturnStmt *RS) {
     return;
   }
 
-  // If the return statement does not return anything, or if it does not return
+  FindRSObjRefVisitor visitor;
+
+  visitor.TraverseStmt(RS);
+
+  // If the return statement does not return anything, or if it does not reference
   // a rsObject, no need to transform it.
 
-  clang::Expr* RetVal = RS->getRetValue();
-  if (!RetVal || CountRSObjectTypes(RetVal->getType().getTypePtr()) == 0) {
+  if (!visitor.foundRSObjRef()) {
     return;
   }
 
