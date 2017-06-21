@@ -35,5 +35,3 @@ void entrypoint() {
     rsDebug("good objects", 0);
   }
 }
-
-
