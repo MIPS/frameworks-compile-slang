@@ -324,6 +324,11 @@ RSExportForEach *RSExportForEach::Create(RSContext *Context,
 
   std::string Id = CreateDummyName("helper_foreach_param", FE->getName());
 
+  // Construct type information about usrData, inputs, and
+  // outputs. Return null when there is an error exporting types.
+
+  bool TypeExportError = false;
+
   // Extract the usrData parameter (if we have one)
   if (FE->mUsrData) {
     const clang::ParmVarDecl *PVD = FE->mUsrData;
@@ -366,19 +371,16 @@ RSExportForEach *RSExportForEach::Create(RSContext *Context,
       RSExportType *ET =
           RSExportType::Create(Context, T.getTypePtr(), LegacyKernelArgument);
 
-      slangAssert(ET && "Failed to export a kernel");
+      if (ET) {
+        slangAssert((ET->getClass() == RSExportType::ExportClassRecord) &&
+                    "Parameter packet must be a record");
 
-      slangAssert((ET->getClass() == RSExportType::ExportClassRecord) &&
-                  "Parameter packet must be a record");
-
-      FE->mParamPacketType = static_cast<RSExportRecordType *>(ET);
+        FE->mParamPacketType = static_cast<RSExportRecordType *>(ET);
+      } else {
+        TypeExportError = true;
+      }
     }
   }
-
-  // Construct type information about inputs and outputs. Return null when
-  // there is an error exporting types.
-
-  bool TypeExportError = false;
 
   if (FE->hasIns()) {
     for (InIter BI = FE->mIns.begin(), EI = FE->mIns.end(); BI != EI; BI++) {
