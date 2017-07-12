@@ -171,6 +171,14 @@ public:
 
   inline void clearFieldIndexMap() { mFieldIndexMap.clear(); }
 
+  enum {
+    TypeNameWithConstantArrayBrackets = 0x01,
+    TypeNameWithRecordElementName     = 0x02,
+    TypeNameC                         = 0x04, // else Java
+    TypeNameDefault                   = TypeNameWithConstantArrayBrackets|TypeNameWithRecordElementName
+  };
+  static std::string GetTypeName(const RSExportType *ET, unsigned Style = TypeNameDefault);
+
 private:
   static bool exportableReduce(const RSExportType *ResultType);
 
