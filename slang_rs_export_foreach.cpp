@@ -314,7 +314,7 @@ RSExportForEach *RSExportForEach::Create(RSContext *Context,
 
   slangAssert(!Name.empty() && "Function must have a name");
 
-  FE = new RSExportForEach(Context, Name);
+  FE = new RSExportForEach(Context, Name, FD->getLocation());
 
   if (!FE->validateAndConstructParams(Context, FD)) {
     return nullptr;
@@ -422,7 +422,7 @@ RSExportForEach *RSExportForEach::Create(RSContext *Context,
 RSExportForEach *RSExportForEach::CreateDummyRoot(RSContext *Context) {
   slangAssert(Context);
   llvm::StringRef Name = "root";
-  RSExportForEach *FE = new RSExportForEach(Context, Name);
+  RSExportForEach *FE = new RSExportForEach(Context, Name, clang::SourceLocation());
   FE->mDummyRoot = true;
   return FE;
 }

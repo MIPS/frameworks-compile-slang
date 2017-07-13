@@ -68,8 +68,8 @@ class RSExportForEach : public RSExportable {
   bool mDummyRoot;
 
   // TODO(all): Add support for LOD/face when we have them
-  RSExportForEach(RSContext *Context, const llvm::StringRef &Name)
-    : RSExportable(Context, RSExportable::EX_FOREACH),
+  RSExportForEach(RSContext *Context, const llvm::StringRef &Name, clang::SourceLocation Loc)
+    : RSExportable(Context, RSExportable::EX_FOREACH, Loc),
       mName(Name.data(), Name.size()), mParamPacketType(nullptr),
       mOutType(nullptr), numParams(0), mSignatureMetadata(0),
       mOut(nullptr), mUsrData(nullptr), mSpecialParameterSignatureMetadata(0),
