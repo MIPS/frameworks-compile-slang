@@ -944,8 +944,8 @@ size_t RSExportType::getAllocSize() const {
 
 RSExportType::RSExportType(RSContext *Context,
                            ExportClass Class,
-                           const llvm::StringRef &Name)
-    : RSExportable(Context, RSExportable::EX_TYPE),
+                           const llvm::StringRef &Name, clang::SourceLocation Loc)
+    : RSExportable(Context, RSExportable::EX_TYPE, Loc),
       mClass(Class),
       // Make a copy on Name since memory stored @Name is either allocated in
       // ASTContext or allocated in GetTypeName which will be destroyed later.
@@ -1506,6 +1506,7 @@ RSExportRecordType *RSExportRecordType::Create(RSContext *Context,
   RSExportRecordType *ERT =
       new RSExportRecordType(Context,
                              TypeName,
+                             RD->getLocation(),
                              RD->hasAttr<clang::PackedAttr>(),
                              mIsArtificial,
                              RL->getDataSize().getQuantity(),
