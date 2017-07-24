@@ -83,18 +83,18 @@ static RSReflectionType gReflectionTypes[] = {
 
 // RS object types are 32 bits in 32-bit RS, but 256 bits in 64-bit RS.
 // This is handled specially by the GetElementSizeInBits() method.
-{ObjectDataType, _,          "RS_ELEMENT",          "ELEMENT", 32,         "Element",         "Element", _, _, _, false},
-{ObjectDataType, _,             "RS_TYPE",             "TYPE", 32,            "Type",            "Type", _, _, _, false},
-{ObjectDataType, _,       "RS_ALLOCATION",       "ALLOCATION", 32,      "Allocation",      "Allocation", _, _, _, false},
-{ObjectDataType, _,          "RS_SAMPLER",          "SAMPLER", 32,         "Sampler",         "Sampler", _, _, _, false},
-{ObjectDataType, _,           "RS_SCRIPT",           "SCRIPT", 32,          "Script",          "Script", _, _, _, false},
-{ObjectDataType, _,             "RS_MESH",             "MESH", 32,            "Mesh",            "Mesh", _, _, _, false},
-{ObjectDataType, _,             "RS_PATH",             "PATH", 32,            "Path",            "Path", _, _, _, false},
-{ObjectDataType, _, "RS_PROGRAM_FRAGMENT", "PROGRAM_FRAGMENT", 32, "ProgramFragment", "ProgramFragment", _, _, _, false},
-{ObjectDataType, _,   "RS_PROGRAM_VERTEX",   "PROGRAM_VERTEX", 32,   "ProgramVertex",   "ProgramVertex", _, _, _, false},
-{ObjectDataType, _,   "RS_PROGRAM_RASTER",   "PROGRAM_RASTER", 32,   "ProgramRaster",   "ProgramRaster", _, _, _, false},
-{ObjectDataType, _,    "RS_PROGRAM_STORE",    "PROGRAM_STORE", 32,    "ProgramStore",    "ProgramStore", _, _, _, false},
-{ObjectDataType, _,             "RS_FONT",             "FONT", 32,            "Font",            "Font", _, _, _, false},
+{ObjectDataType,          "rs_element",          "RS_ELEMENT",          "ELEMENT", 32,         "Element",         "Element", _, _, _, false},
+{ObjectDataType,             "rs_type",             "RS_TYPE",             "TYPE", 32,            "Type",            "Type", _, _, _, false},
+{ObjectDataType,       "rs_allocation",       "RS_ALLOCATION",       "ALLOCATION", 32,      "Allocation",      "Allocation", _, _, _, false},
+{ObjectDataType,          "rs_sampler",          "RS_SAMPLER",          "SAMPLER", 32,         "Sampler",         "Sampler", _, _, _, false},
+{ObjectDataType,           "rs_script",           "RS_SCRIPT",           "SCRIPT", 32,          "Script",          "Script", _, _, _, false},
+{ObjectDataType,             "rs_mesh",             "RS_MESH",             "MESH", 32,            "Mesh",            "Mesh", _, _, _, false},
+{ObjectDataType,             "rs_path",             "RS_PATH",             "PATH", 32,            "Path",            "Path", _, _, _, false},
+{ObjectDataType, "rs_program_fragment", "RS_PROGRAM_FRAGMENT", "PROGRAM_FRAGMENT", 32, "ProgramFragment", "ProgramFragment", _, _, _, false},
+{ObjectDataType,   "rs_program_vertex",   "RS_PROGRAM_VERTEX",   "PROGRAM_VERTEX", 32,   "ProgramVertex",   "ProgramVertex", _, _, _, false},
+{ObjectDataType,   "rs_program_raster",   "RS_PROGRAM_RASTER",   "PROGRAM_RASTER", 32,   "ProgramRaster",   "ProgramRaster", _, _, _, false},
+{ObjectDataType,    "rs_program_store",    "RS_PROGRAM_STORE",    "PROGRAM_STORE", 32,    "ProgramStore",    "ProgramStore", _, _, _, false},
+{ObjectDataType,             "rs_font",             "RS_FONT",             "FONT", 32,            "Font",            "Font", _, _, _, false},
 #undef _
 };
 
