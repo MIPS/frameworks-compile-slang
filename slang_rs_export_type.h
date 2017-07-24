@@ -627,6 +627,9 @@ class RSExportRecordType : public RSExportType {
   inline const_field_iterator fields_end() const {
     return this->mFields.end();
   }
+  inline size_t fields_size() const {
+    return this->mFields.size();
+  }
 
  private:
   std::list<const Field*> mFields;
