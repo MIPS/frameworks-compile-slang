@@ -466,11 +466,15 @@ void ReflectionState::addForEachSignatureMetadata(const RSExportForEach *EF, uns
   // These are properties in the metadata that we need to check.
   const unsigned SpecialParameterBits = bcinfo::MD_SIG_X|bcinfo::MD_SIG_Y|bcinfo::MD_SIG_Z|bcinfo::MD_SIG_Ctxt;
 
-  // These are properties in the metadata that we already check in
-  // some other way.
-  const unsigned BoringBits = bcinfo::MD_SIG_In|bcinfo::MD_SIG_Out|bcinfo::MD_SIG_Usr|bcinfo::MD_SIG_Kernel;
+#ifndef __DISABLE_ASSERTS
+  {
+    // These are properties in the metadata that we already check in
+    // some other way.
+    const unsigned BoringBits = bcinfo::MD_SIG_In|bcinfo::MD_SIG_Out|bcinfo::MD_SIG_Usr|bcinfo::MD_SIG_Kernel;
 
-  slangAssert((Metadata & ~(SpecialParameterBits | BoringBits)) == 0);
+    slangAssert((Metadata & ~(SpecialParameterBits | BoringBits)) == 0);
+  }
+#endif
 
   auto &mSignatureMetadata = mFiles.Current().mForEaches[EF->getOrdinal()].mSignatureMetadata;
   if (isCollecting()) {
