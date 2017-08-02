@@ -315,6 +315,7 @@ RSExportForEach *RSExportForEach::Create(RSContext *Context,
   slangAssert(!Name.empty() && "Function must have a name");
 
   FE = new RSExportForEach(Context, Name, FD->getLocation());
+  FE->mOrdinal = Context->getNextForEachOrdinal();
 
   if (!FE->validateAndConstructParams(Context, FD)) {
     return nullptr;
@@ -391,6 +392,7 @@ RSExportForEach *RSExportForEach::Create(RSContext *Context,
 
       // It is not an error if we don't export an input type for legacy
       // kernel arguments. This can happen in the case of a void pointer.
+      // See ReflectionState::addForEachIn().
       if (FE->mIsKernelStyle && !InExportType) {
         TypeExportError = true;
       }
