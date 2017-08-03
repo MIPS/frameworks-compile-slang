@@ -117,7 +117,7 @@ cc_binary_host {
     srcs: ["llvm-rs-as.cpp"],
 
     static_libs: ["libslang"] + static_libraries_needed_by_slang,
-    shared_libs: ["libLLVM"],
+    shared_libs: ["libLLVM_android"],
 
     product_variables: {
         unbundled_build: {
@@ -169,8 +169,8 @@ cc_binary_host {
 
     shared_libs: [
         "libbcinfo",
-        "libclang",
-        "libLLVM",
+        "libclang_android",
+        "libLLVM_android",
     ],
 
     target: {
