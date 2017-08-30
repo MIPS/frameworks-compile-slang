@@ -69,7 +69,7 @@ void dnFe(const int *in, int *out, const struct DivergentNest *data) { }
 void ndInv(int i, int j) { }
 
 // for arguments, should get a helper struct that looks like struct Divergent
-void dInv(int i, rs_allocation a, int j) { }
+void dInv(int i, rs_allocation a, int j) { (void)a; }
 
 // for arguments, should get a helper struct that looks like struct DivergentNest
-void dnInv(int x, struct Divergent d, int y) { }
+void dnInv(int x, struct Divergent d, int y) { (void)d; }
