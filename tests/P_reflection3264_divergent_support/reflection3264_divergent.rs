@@ -51,9 +51,15 @@ struct DivergentNest {
   int y;
 };
 
+#if 0
+
+// TODO: Add these variables back once http://b/65210157 is fixed
+
 struct DivergentNest dnVar;
 
 struct DivergentNest dnArray[10];
+
+#endif
 
 void intFe(const int *in, int *out, const int *data) { }
 
